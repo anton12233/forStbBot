@@ -16,7 +16,7 @@ function doPost(e)
       case '/quest':
         if (chat_id != -1.001254244125E12)      
         {
-          getSomhingFromQuest(msg_array[1],chat_id)
+          getSomethingFromQuest(msg_array[1],chat_id)
         }
         else
         {
@@ -46,7 +46,7 @@ function doPost(e)
       case '/help':
         if (chat_id != -1.001254244125E12)      
         {
-          send ('/quest &lt;Название предмета&gt; - Получить список актуальных мероприятий\n/list - Получить список предметов\n/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
+          send ('/quest &lt;Название предмета&gt; - Получить список актуальных мероприятий(если указывать без предмета, то будет только ближайшее событие(что-бы вывести все события нужно написать вместо названия предмета слово "Всё"\n(/list - Получить список предметов\n/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
         }
         else
         {
@@ -68,7 +68,7 @@ function doPost(e)
        case '/teacher':
         if (chat_id != -1.001254244125E12)      
         {
-          entryOnLesson(chat_id)
+          getSomethingFromContact(msg_array[1], chat_id)
         }
         else
         {
@@ -85,7 +85,14 @@ sendImg('https://cs5.pikabu.ru/post_img/big/2015/11/26/11/1448564914_1773679175.
 }
 
 
-function getSomhingFromQuest(str, chat_id)
+function getSomethingFromContact(lesson, chat_id)
+{
+sendImg('https://cs5.pikabu.ru/post_img/big/2015/11/26/11/1448564914_1773679175.PNG',chat_id ,'Когда-нибудь я сделаю этот раздел')
+}
+
+
+
+function getSomethingFromQuest(str, chat_id)
 {
   var DOC = SpreadsheetApp.openById("1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY");
   var sheetLocal = tableID.getSheetByName('Квесты');
@@ -104,12 +111,14 @@ function getSomhingFromQuest(str, chat_id)
   
   while(sheetLocal.getRange(positionYStart,positionXStart).getValues() != '')
   {
-      if ((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined) && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false')
+      if (((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined)||(str=='Всё')) && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false')
       {
          iventData = 'Что: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues()) +'\nГде: ' + String(sheetLocal.getRange(positionYStart,positionXStart+2).getValues()) + '\nКогда: ' + sheetLocal.getRange(positionYStart,positionXStart-2).getValues().toLocaleString("ru", dateOpt)
          send (iventData, chat_id)
          check++;
       }
+      if (str == undefined && check == 1)
+        break;
     positionYStart++;
   }
   if (check == 0)
@@ -124,6 +133,7 @@ function send (msg, chat_id)
     'method': 'sendMessage',
     'chat_id': String(chat_id),
     'text': msg,
+    'disable_notification': true,
     'parse_mode': 'HTML'
   }
   var data =
@@ -131,12 +141,11 @@ function send (msg, chat_id)
     "method": "post",
     "payload": payload
   }
-  var API_TOKEN = '1347046493:AAGXCVAKAUqRirc_vLUVw94ncxiiTI5QPtc'
-  UrlFetchApp.fetch('https://api.telegram.org/bot' + API_TOKEN + '/', data);
+  UrlFetchApp.fetch('https://api.telegram.org/bot' + getToken() + '/', data);
 }
 
 
-function sendImg (imgStr,chat_id, caption)
+function sendImg (imgStr, chat_id, caption)
 {
   var payload =
   {
@@ -150,6 +159,5 @@ function sendImg (imgStr,chat_id, caption)
     "method": "post",
     "payload": payload
   }
-  var API_TOKEN = '1347046493:AAGXCVAKAUqRirc_vLUVw94ncxiiTI5QPtc'
   UrlFetchApp.fetch('https://api.telegram.org/bot' + getToken() + '/', data);
 }
