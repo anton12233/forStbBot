@@ -11,71 +11,34 @@ function doPost(e)
     var date = (msg.date/86400)+25569.125;
     var user = msg.from.id;
     
-    switch (msg_array[0])
+    if ((chat_id != -1.001254244125E12) || (user = 3.36726766E8))      
     {
-      case '/quest':
-        if (chat_id != -1.001254244125E12)      
+        switch (msg_array[0])
         {
-          getSomethingFromQuest(msg_array[1],chat_id)
+          case '/quest':
+              getSomethingFromQuest(msg_array[1],chat_id)
+              break;
+          case '/list':
+              send("Физика\nИностранный_язык\nФилософия\nМатематика\nТЦП\nОП(Ф)\nОП(П)\nАСД(Ф)\nАСД(П)\nВПД\nОРПО\nПрочее",chat_id)
+              break;
+           case '/github':
+              send("https://github.com/anton12233/forStbBot/",chat_id)
+              break;
+          case '/help':
+              send ('/quest &lt;Название предмета&gt; - Получить список актуальных мероприятий(если указывать без предмета, то будет только ближайшее событие(что-бы вывести все события нужно написать вместо названия предмета слово "Всё"\n(/list - Получить список предметов\n/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
+              break;
+          case '/entry':
+              entryOnLesson(chat_id)
+              break;
+          case '/teacher':
+              getSomethingFromContact(msg_array[1], chat_id)
+              break;
         }
-        else
-        {
-          sendImg('https://imageshost.ru/images/2020/09/08/01.png',chat_id)
-        }
-        break;
-      case '/list':
-        if (chat_id != -1.001254244125E12)
-        {
-          send("Физика\nИностранный_язык\nФилософия\nМатематика\nТЦП\nОП(Ф)\nОП(П)\nАСД(Ф)\nАСД(П)\nВПД\nОРПО\nПрочее",chat_id)
-        }
-        else
-        {
-          sendImg('https://imageshost.ru/images/2020/09/08/01.png',chat_id)
-        }
-        break;
-       case '/github':
-        if (chat_id != -1.001254244125E12)
-        {
-          send("https://github.com/anton12233/forStdBot/",chat_id)
-        }
-        else
-        {
-          sendImg('https://imageshost.ru/images/2020/09/08/01.png',chat_id)
-        }
-        break;
-      case '/help':
-        if (chat_id != -1.001254244125E12)      
-        {
-          send ('/quest &lt;Название предмета&gt; - Получить список актуальных мероприятий(если указывать без предмета, то будет только ближайшее событие(что-бы вывести все события нужно написать вместо названия предмета слово "Всё"\n(/list - Получить список предметов\n/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
-        }
-        else
-        {
-          sendImg('https://imageshost.ru/images/2020/09/08/01.png',chat_id)
-        }
-        break;
-        
-      case '/entry':
-        if (chat_id != -1.001254244125E12)      
-        {
-          entryOnLesson(chat_id)
-        }
-        else
-        {
-          sendImg('https://imageshost.ru/images/2020/09/08/01.png',chat_id)
-        }
-        break;
-        
-       case '/teacher':
-        if (chat_id != -1.001254244125E12)      
-        {
-          getSomethingFromContact(msg_array[1], chat_id)
-        }
-        else
-        {
-          sendImg('https://imageshost.ru/images/2020/09/08/01.png',chat_id)
-        }
-        break;
     }
+    else
+        {
+          sendImg('https://imageshost.ru/images/2020/09/08/01.png',chat_id)
+        }
   }
 }
 
@@ -100,6 +63,7 @@ function getSomethingFromQuest(str, chat_id)
   var iventData
   var check = 0
   var checkItem;
+  var what, where, when, link;
   
   var dateOpt = {
     year: 'numeric',
@@ -113,7 +77,15 @@ function getSomethingFromQuest(str, chat_id)
   {
       if (((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined)||(str=='Всё')) && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false')
       {
-         iventData = 'Что: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues()) +'\nГде: ' + String(sheetLocal.getRange(positionYStart,positionXStart+2).getValues()) + '\nКогда: ' + sheetLocal.getRange(positionYStart,positionXStart-2).getValues().toLocaleString("ru", dateOpt)
+        what = 'Что: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues())
+        where = '\nГде: ' + String(sheetLocal.getRange(positionYStart,positionXStart+2).getValues())
+        when = '\nКогда: ' + sheetLocal.getRange(positionYStart,positionXStart-2).getValues().toLocaleString("ru", dateOpt)
+        //link = '\nСсылка: '+ sheetLocal.getRange(positionYStart,positionXStart+2).getFormula()
+           
+            
+            
+        
+         iventData = what + where + when// + link
          send (iventData, chat_id)
          check++;
       }
@@ -124,6 +96,9 @@ function getSomethingFromQuest(str, chat_id)
   if (check == 0)
     send('Ничего не нашел(', chat_id)
 }
+
+
+
 
 
 function send (msg, chat_id)
@@ -152,7 +127,8 @@ function sendImg (imgStr, chat_id, caption)
     'method': 'sendPhoto',
     'chat_id': String(chat_id),
     'photo': imgStr,
-    'caption': caption
+    'caption': caption,
+    'disable_notification': true
   }
   var data =
   {

@@ -12,7 +12,7 @@ function menu()
     menuEntries.push(null); 
     menuEntries.push({name: "Отчислить", functionName: "numeratic"});
     ss.addMenu("А я меню с фунциями", menuEntries);
-  }
+}
 
 //Создание и определение глобальных переменных цветов для красящих функций  
 var tableID = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY/edit#gid=0');
