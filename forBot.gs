@@ -1,3 +1,4 @@
+//Функция обработки входящих команд
 function doPost(e) 
 {
   var update = JSON.parse(e.postData.contents);
@@ -10,7 +11,7 @@ function doPost(e)
     var msg_array = msg.text.split(" ");
     var date = (msg.date/86400)+25569.125;
     var user = msg.from.id;
-    
+    //Обработка команд
     if ((chat_id != -1.001254244125E12) || (user == 3.36726766E8))      
     {
         switch (msg_array[0])
@@ -25,7 +26,7 @@ function doPost(e)
                 send("https://github.com/anton12233/forStbBot/",chat_id)
                 break;
             case '/help':
-                send ('/quest &lt;Название предмета&gt; - Получить список актуальных мероприятий(если указывать без предмета, то будет только ближайшее событие(что-бы вывести все события нужно написать вместо названия предмета слово "Всё"\n(/list - Получить список предметов\n/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
+                send ('/quest <Название предмета> - Получить список актуальных мероприятий(если указывать без предмета, то будет только ближайшее событие(что-бы вывести все события нужно написать вместо названия предмета слово "Всё"(Пока не работает))\n/list - Получить список предметов\n/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
                 break;
             case '/entry':
                 entryOnLesson(chat_id)
@@ -41,29 +42,27 @@ function doPost(e)
         }
   }
 }
-
+//Будущая функция для записи на сдачу предмета
 function entryOnLesson(chat_id)
 {
     sendImg('https://cs5.pikabu.ru/post_img/big/2015/11/26/11/1448564914_1773679175.PNG',chat_id ,'Когда-нибудь я сделаю этот раздел')
 }
 
-
+//Будущая функция для поиски контактной информации по названию предмета
 function getSomethingFromContact(lesson, chat_id)
 {
     sendImg('https://cs5.pikabu.ru/post_img/big/2015/11/26/11/1448564914_1773679175.PNG',chat_id ,'Когда-нибудь я сделаю этот раздел')
 }
-
+//Функция для вывода будущих ивентов
 function getSomethingFromQuest(str)
 {
   var DOC = SpreadsheetApp.openById("1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY");
   var sheetLocal = tableID.getSheetByName('Квесты');
-  var positionYStart = 3, positionXStart = 4
-  var iventData
+  var positionYStart = 3, positionXStart = 4 
   var check = 0
-  var checkItem;
-  var what, where, when, link;
-  var regex = new RegExp(/Intrusion signature\(s\)\:\n\n(.*)/);
-  var dateOpt = {
+  var iventData, what, where, when, link;
+  var dateOpt = 
+  { //Форма для вывода даты
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -71,35 +70,40 @@ function getSomethingFromQuest(str)
       minute: 'numeric'
   }
   while(sheetLocal.getRange(positionYStart,positionXStart).getValues() != '')
-  {
+  {         //Выборка по предмету среди будущих событий (в случа отсутствия названия предмета цикл выполняется один раз и выводит только ближайшее событие)
       if (((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined)||(str=='Всё')) && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false')
-      {
+      { //Сбор информации со строки   
         what = 'Что: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues())
         where = '\nГде: ' + String(sheetLocal.getRange(positionYStart,positionXStart+2).getValues())
         when = '\nКогда: ' + sheetLocal.getRange(positionYStart,positionXStart-2).getValues().toLocaleString("ru", dateOpt)
-
+        //Проверка на присутствие ссылки в формуле в таблице
         if ((sheetLocal.getRange(positionYStart,positionXStart+2).getFormula())[1] != null)
-            {
+            {//И формирование ссылки по стандарту Markdown для отправки в telegram
             link = '\nCсылка: '+'[Тут]('+ /"(.*?)"/.exec(sheetLocal.getRange(positionYStart,positionXStart+2).getFormula())[1]+')'
             }
         else 
             {
             link = ''
             }
-
+         //Формирование финального текста со всеми данными
          iventData = what + where + when + link
          
          return iventData
+         //Счётчик для того что бы отправить только одну запись
          check++;
       }
       if (str == undefined && check == 1)
+      {//Выход из цикла при отсутствии названия предмета
         break;
+      }
     positionYStart++;
   }
   if (check == 0)
+  {//Выход из функции с сообщением о том что ничего нет
     return 'Ничего не нашел'
+  }
 }
-
+//Функция отправки текстового письма
 function send (msg, chat_id)
 {
   var payload =
@@ -117,7 +121,7 @@ function send (msg, chat_id)
   }
   UrlFetchApp.fetch('https://api.telegram.org/bot' + getToken() + '/', data);
 }
-
+//Функция отправки изображения
 function sendImg (imgStr, chat_id, caption)
 {
   var payload =
