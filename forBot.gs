@@ -15,45 +15,43 @@ function doPost(e)
     {
         switch (msg_array[0])
         {
-          case '/quest':
-              send(getSomethingFromQuest(msg_array[1]), chat_id)
-              break;
-          case '/list':
-              send("Физика\nИностранный_язык\nФилософия\nМатематика\nТЦП\nОП(Ф)\nОП(П)\nАСД(Ф)\nАСД(П)\nВПД\nОРПО\nПрочее",chat_id)
-              break;
-           case '/github':
-              send("https://github.com/anton12233/forStbBot/",chat_id)
-              break;
-          case '/help':
-              send ('/quest &lt;Название предмета&gt; - Получить список актуальных мероприятий(если указывать без предмета, то будет только ближайшее событие(что-бы вывести все события нужно написать вместо названия предмета слово "Всё"\n(/list - Получить список предметов\n/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
-              break;
-          case '/entry':
-              entryOnLesson(chat_id)
-              break;
-          case '/teacher':
-              getSomethingFromContact(msg_array[1], chat_id)
-              break;
+            case '/quest':
+                send(getSomethingFromQuest(msg_array[1]), chat_id)
+                break;
+            case '/list':
+                send("Физика\nИностранный_язык\nФилософия\nМатематика\nТЦП\nОП(Ф)\nОП(П)\nАСД(Ф)\nАСД(П)\nВПД\nОРПО\nПрочее",chat_id)
+                break;
+            case '/github':
+                send("https://github.com/anton12233/forStbBot/",chat_id)
+                break;
+            case '/help':
+                send ('/quest &lt;Название предмета&gt; - Получить список актуальных мероприятий(если указывать без предмета, то будет только ближайшее событие(что-бы вывести все события нужно написать вместо названия предмета слово "Всё"\n(/list - Получить список предметов\n/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
+                break;
+            case '/entry':
+                entryOnLesson(chat_id)
+                break;
+            case '/teacher':
+                getSomethingFromContact(msg_array[1], chat_id)
+                break;
         }
     }
     else
         {
-          sendImg('https://imageshost.ru/images/2020/09/08/01.png',chat_id)
+            sendImg('https://imageshost.ru/images/2020/09/08/01.png',chat_id)
         }
   }
 }
 
 function entryOnLesson(chat_id)
 {
-sendImg('https://cs5.pikabu.ru/post_img/big/2015/11/26/11/1448564914_1773679175.PNG',chat_id ,'Когда-нибудь я сделаю этот раздел')
+    sendImg('https://cs5.pikabu.ru/post_img/big/2015/11/26/11/1448564914_1773679175.PNG',chat_id ,'Когда-нибудь я сделаю этот раздел')
 }
 
 
 function getSomethingFromContact(lesson, chat_id)
 {
-sendImg('https://cs5.pikabu.ru/post_img/big/2015/11/26/11/1448564914_1773679175.PNG',chat_id ,'Когда-нибудь я сделаю этот раздел')
+    sendImg('https://cs5.pikabu.ru/post_img/big/2015/11/26/11/1448564914_1773679175.PNG',chat_id ,'Когда-нибудь я сделаю этот раздел')
 }
-
-
 
 function getSomethingFromQuest(str)
 {
@@ -66,11 +64,11 @@ function getSomethingFromQuest(str)
   var what, where, when, link;
   var regex = new RegExp(/Intrusion signature\(s\)\:\n\n(.*)/);
   var dateOpt = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric'
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric'
   }
   while(sheetLocal.getRange(positionYStart,positionXStart).getValues() != '')
   {
@@ -102,10 +100,6 @@ function getSomethingFromQuest(str)
     return 'Ничего не нашел'
 }
 
-
-
-
-
 function send (msg, chat_id)
 {
   var payload =
@@ -123,7 +117,6 @@ function send (msg, chat_id)
   }
   UrlFetchApp.fetch('https://api.telegram.org/bot' + getToken() + '/', data);
 }
-
 
 function sendImg (imgStr, chat_id, caption)
 {
