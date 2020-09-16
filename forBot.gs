@@ -11,12 +11,12 @@ function doPost(e)
     var date = (msg.date/86400)+25569.125;
     var user = msg.from.id;
     
-    if ((chat_id != -1.001254244125E12) || (user = 3.36726766E8))      
+    if ((chat_id != -1.001254244125E12) || (user == 3.36726766E8))      
     {
         switch (msg_array[0])
         {
           case '/quest':
-              getSomethingFromQuest(msg_array[1],chat_id)
+              send(getSomethingFromQuest(msg_array[1]), chat_id)
               break;
           case '/list':
               send("Физика\nИностранный_язык\nФилософия\nМатематика\nТЦП\nОП(Ф)\nОП(П)\nАСД(Ф)\nАСД(П)\nВПД\nОРПО\nПрочее",chat_id)
@@ -55,7 +55,7 @@ sendImg('https://cs5.pikabu.ru/post_img/big/2015/11/26/11/1448564914_1773679175.
 
 
 
-function getSomethingFromQuest(str, chat_id)
+function getSomethingFromQuest(str)
 {
   var DOC = SpreadsheetApp.openById("1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY");
   var sheetLocal = tableID.getSheetByName('Квесты');
@@ -64,7 +64,7 @@ function getSomethingFromQuest(str, chat_id)
   var check = 0
   var checkItem;
   var what, where, when, link;
-  
+  var regex = new RegExp(/Intrusion signature\(s\)\:\n\n(.*)/);
   var dateOpt = {
     year: 'numeric',
     month: 'long',
@@ -72,7 +72,6 @@ function getSomethingFromQuest(str, chat_id)
     hour: 'numeric',
     minute: 'numeric'
   }
-  
   while(sheetLocal.getRange(positionYStart,positionXStart).getValues() != '')
   {
       if (((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined)||(str=='Всё')) && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false')
@@ -80,13 +79,19 @@ function getSomethingFromQuest(str, chat_id)
         what = 'Что: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues())
         where = '\nГде: ' + String(sheetLocal.getRange(positionYStart,positionXStart+2).getValues())
         when = '\nКогда: ' + sheetLocal.getRange(positionYStart,positionXStart-2).getValues().toLocaleString("ru", dateOpt)
-        //link = '\nСсылка: '+ sheetLocal.getRange(positionYStart,positionXStart+2).getFormula()
-           
-            
-            
-        
-         iventData = what + where + when// + link
-         send (iventData, chat_id)
+
+        if ((sheetLocal.getRange(positionYStart,positionXStart+2).getFormula())[1] != null)
+            {
+            link = '\nCсылка: '+'[Тут]('+ /"(.*?)"/.exec(sheetLocal.getRange(positionYStart,positionXStart+2).getFormula())[1]+')'
+            }
+        else 
+            {
+            link = ''
+            }
+
+         iventData = what + where + when + link
+         
+         return iventData
          check++;
       }
       if (str == undefined && check == 1)
@@ -94,7 +99,7 @@ function getSomethingFromQuest(str, chat_id)
     positionYStart++;
   }
   if (check == 0)
-    send('Ничего не нашел(', chat_id)
+    return 'Ничего не нашел'
 }
 
 
@@ -109,7 +114,7 @@ function send (msg, chat_id)
     'chat_id': String(chat_id),
     'text': msg,
     'disable_notification': true,
-    'parse_mode': 'HTML'
+    'parse_mode': 'Markdown'
   }
   var data =
   {
