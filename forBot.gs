@@ -26,7 +26,7 @@ function doPost(e)
                 send("https://github.com/anton12233/forStbBot/",chat_id)
                 break;
             case '/help':
-                send ('/quest <Название предмета> - Получить список актуальных мероприятий(если указывать без предмета, то будет только ближайшее событие(что-бы вывести все события нужно написать вместо названия предмета слово "Всё"(Пока не работает))\n/list - Получить список предметов\n/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
+                send ('/quest <Название предмета> - Получить список актуальных мероприятий(если указывать без предмета, то будет только ближайшее событие)(что-бы вывести все события нужно написать вместо названия предмета слово "Всё")\n/list - Получить список предметов\n/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
                 break;
             case '/entry':
                 entryOnLesson(chat_id)
@@ -59,8 +59,7 @@ function getSomethingFromQuest(str)
   var DOC = SpreadsheetApp.openById("1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY");
   var sheetLocal = tableID.getSheetByName('Квесты');
   var positionYStart = 3, positionXStart = 4 
-  var check = 0
-  var iventData, what, where, when, link;
+  var iventData = '', what, where, when, link;
   var dateOpt = 
   { //Форма для вывода даты
       year: 'numeric',
@@ -69,6 +68,7 @@ function getSomethingFromQuest(str)
       hour: 'numeric',
       minute: 'numeric'
   }
+  //str = ''
   while(sheetLocal.getRange(positionYStart,positionXStart).getValues() != '')
   {         //Выборка по предмету среди будущих событий (в случа отсутствия названия предмета цикл выполняется один раз и выводит только ближайшее событие)
       if (((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined)||(str=='Всё')) && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false')
@@ -85,24 +85,23 @@ function getSomethingFromQuest(str)
             {
             link = ''
             }
-         //Формирование финального текста со всеми данными
-         iventData = what + where + when + link
-         
-         return iventData
-         //Счётчик для того что бы отправить только одну запись
-         check++;
+         //Формирование текста со всеми данными
+         iventData = what + where + when + link + '\n----------\n' + iventData
       }
-      if (str == undefined && check == 1)
-      {//Выход из цикла при отсутствии названия предмета
+      if (str == undefined)
+      {//Выход из цикла при отсутствии названия предмета что бы вывести только ближайщее событие
         break;
       }
-    positionYStart++;
+      positionYStart++;
   }
-  if (check == 0)
-  {//Выход из функции с сообщением о том что ничего нет
-    return 'Ничего не нашел'
+  if (iventData == '')
+  {//Cообщение о том что ничего нет
+      return iventData = 'Ничего не нашел'
   }
+  iventData = '\n----------\n'+ iventData
+  return iventData
 }
+
 //Функция отправки текстового письма
 function send (msg, chat_id)
 {
