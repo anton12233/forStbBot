@@ -59,6 +59,7 @@ function getSomethingFromQuest(str)
   var DOC = SpreadsheetApp.openById("1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY");
   var sheetLocal = tableID.getSheetByName('Квесты');
   var positionYStart = 3, positionXStart = 4 
+  var check = 0
   var iventData = '', what, where, when, link;
   var dateOpt = 
   { //Форма для вывода даты
@@ -68,8 +69,8 @@ function getSomethingFromQuest(str)
       hour: 'numeric',
       minute: 'numeric'
   }
-  //str = ''
-  while(sheetLocal.getRange(positionYStart,positionXStart).getValues() != '')
+  //str = 'Физика'
+  while((sheetLocal.getRange(positionYStart,positionXStart).getValues() != '') || (str == undefined && check == 1))
   {         //Выборка по предмету среди будущих событий (в случа отсутствия названия предмета цикл выполняется один раз и выводит только ближайшее событие)
       if (((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined)||(str=='Всё')) && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false')
       { //Сбор информации со строки   
@@ -87,20 +88,22 @@ function getSomethingFromQuest(str)
             }
          //Формирование текста со всеми данными
          iventData = what + where + when + link + '\n----------\n' + iventData
+         
+         //Счётчик для того что бы вывести только ближайщее событие. Он используеться что бы выбрать только актуальное событие 
+         check ++ 
       }
-      if (str == undefined)
-      {//Выход из цикла при отсутствии названия предмета что бы вывести только ближайщее событие
-        break;
-      }
+      
       positionYStart++;
   }
-  if (iventData == '')
+  Logger.log(iventData)
+  if (check == 0)
   {//Cообщение о том что ничего нет
-      return iventData = 'Ничего не нашел'
+      iventData = 'Ничего не нашел'
   }
   iventData = '\n----------\n'+ iventData
   return iventData
 }
+
 
 //Функция отправки текстового письма
 function send (msg, chat_id)
