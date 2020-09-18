@@ -71,6 +71,26 @@ function dateColorize() {
   }
 };
 
+
+function dateUpdate() {
+  var tableID = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY/edit#gid=0');
+  var sheetLocal = tableID.getSheetByName('Пары');
+  var positionYStart = 3, positionXStart = 1
+  
+  var inTable, toDay = new Date()
+  while(positionYStart <= 30)
+  {
+      inTable = new Date(sheetLocal.getRange(positionYStart,positionXStart).getValues()[0][0])
+      if(inTable.getDate() == toDay.getDate())
+      { 
+          Logger.log(inTable)
+          inTable.setDate(inTable.getDate() + 7)
+          sheetLocal.getRange(positionYStart,positionXStart).setValue(inTable)
+      }   
+  positionYStart++
+  }
+};
+
 //Функция покраски мест
 function placeColorize() {
   var tableID = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY/edit#gid=0');
