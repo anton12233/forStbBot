@@ -34,6 +34,9 @@ function doPost(e)
             case '/teacher':
                 getSomethingFromContact(msg_array[1], chat_id)
                 break;
+            case '/lesson':
+                send(getSomethingFromLesson(msg_array[1],chat_id),chat_id)
+                break;
         }
     }
     else
@@ -53,12 +56,67 @@ function getSomethingFromContact(lesson, chat_id)
     sendImg('https://cs5.pikabu.ru/post_img/big/2015/11/26/11/1448564914_1773679175.PNG',chat_id ,'Когда-нибудь я сделаю этот раздел')
 }
 
-//Будущая функция для получения информации о ближайших парах
-function getSomethingFromLesson(lesson, chat_id)
+//Функция для получения информации о ближайших парах
+function getSomethingFromLesson(lesson,chat_id)
 {
+  var tableID = SpreadsheetApp.openById("1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY");
+  var sheetLocal = tableID.getSheetByName('Пары');
+  var positionYStart = 3, positionXStart = 2
+  var toDay = new Date(), inTable, nextInTable
+  var cheak = 0
+  var lessonData = '', what, where, when, link;
+  var dateOpt = 
+  { //Форма для вывода даты
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric'
+  }
+  
+  //lesson = 'Скоро'
+  while(positionYStart <= 30)
+  {
+      inTable = new Date(sheetLocal.getRange(positionYStart,positionXStart).getValues()[0][0])
+      nextInTable = new Date(sheetLocal.getRange(positionYStart+1,positionXStart).getValues()[0][0])
+  
+      if (((lesson == undefined) && (inTable.getDate()+'/'+inTable.getMonth() == toDay.getDate()+'/'+toDay.getMonth()))
+      || ((lesson == 'Всё') && (sheetLocal.getRange(positionYStart,positionXStart+1).getValues()[0][0] != '')) 
+      || ((lesson == 'Скоро') && (inTable > toDay)))
+      {
+          what = 'Что: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues()[0][0])
+          where = '\nГде: ' + String(sheetLocal.getRange(positionYStart,positionXStart+2).getValues()[0][0])
+          when = '\nКогда: ' + sheetLocal.getRange(positionYStart,positionXStart).getValues().toLocaleString("ru", dateOpt)
+          if ((sheetLocal.getRange(positionYStart,positionXStart+2).getFormula())[1] != null)
+          {//И формирование ссылки по стандарту Markdown для отправки в telegram
+              link = '\nCсылка: '+'[Тут]('+ /"(.*?)"/.exec(sheetLocal.getRange(positionYStart,positionXStart+2).getFormula())[1]+')'
+          }
+          else 
+          {
+              link = ''
+          }
+          lessonData = lessonData + what + where + when + link + '\n----------\n'
+          cheak++
+          
+          if ((lesson == 'Скоро')&&(inTable.getDate()+'/'+inTable.getMonth() != nextInTable.getDate()+'/'+nextInTable.getMonth()))
+          {
+            break
+          
+          }
+       }
+  positionYStart++
+  }
+  
+  lessonData = '\n----------\n'+ lessonData
+  
+  if(cheak == 0)
+  {
+      lessonData = 'Сегодня пар нету'
+  }
+  return lessonData
 
-    //Надо будет написать функцию для таблицы, которая будет обновлять даты занятий после того, как они пройдут 
-    sendImg('https://cs5.pikabu.ru/post_img/big/2015/11/26/11/1448564914_1773679175.PNG',chat_id ,'Когда-нибудь я сделаю этот раздел')
+  
+
+
 }
 
 
@@ -80,7 +138,8 @@ function getSomethingFromQuest(str)
   }
   while((sheetLocal.getRange(positionYStart,positionXStart).getValues() != '') && (!(str == undefined && check == 1)))
   {//Выборка по предмету среди будущих событий (в случа отсутствия названия предмета цикл выполняется один раз и выводит только ближайшее событие)
-      if (((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined)||(str=='Всё')) && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false')
+      if (((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined)||(str=='Всё'))
+      && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false')
       {//Сбор информации со строки   
          what = 'Что: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues())
          where = '\nГде: ' + String(sheetLocal.getRange(positionYStart,positionXStart+2).getValues())
@@ -102,12 +161,12 @@ function getSomethingFromQuest(str)
 
       positionYStart++;
   }
-  Logger.log(check)
+  iventData = '\n----------\n'+ iventData
+  
   if (check == 0)
   {//Cообщение о том что ничего не нашел
       iventData = 'Ничего не нашел'
   }
-  iventData = '\n----------\n'+ iventData
   return iventData
 }
 
