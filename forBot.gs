@@ -26,7 +26,10 @@ function doPost(e)
                 send("https://github.com/anton12233/forStbBot/",chat_id)
                 break;
             case '/help':
-                send ('/quest <Название предмета> - Получить список актуальных мероприятий(если указывать без предмета, то будет только ближайшее событие)(что-бы вывести все события нужно написать вместо названия предмета слово "Всё")\n/list - Получить список предметов\n/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
+                send ('/quest <Название предмета> - Получить список актуальных мероприятий (Если написать команду без предмета, то будет только ближайшее событие)(что-бы вывести все события нужно написать вместо названия предмета слово "Всё")\n'+
+                '/lesson - Получить информацию по рассписанию (Без добавочных команд выдаст расписание на сегодня; \nЕсли после команды дописать "Скоро", то бот выдаст все пары на ближайший день; \nЕсли после команды дописать "Всё", то бот выдаст расписание на всю неделю; \nЕсли после команды дописать "Осталось", то бот выдаст только оставшиеся пары этой недели)(Обновление дат переодических пар будет происходить каждую субботу после пар)\n'+
+                '/list - Получить список предметов\n'+
+                '/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
                 break;
             case '/entry':
                 entryOnLesson(chat_id)
@@ -35,13 +38,13 @@ function doPost(e)
                 getSomethingFromContact(msg_array[1], chat_id)
                 break;
             case '/lesson':
-                send(getSomethingFromLesson(msg_array[1],chat_id),chat_id)
+                send(getSomethingFromLesson(msg_array[1]),chat_id)
                 break;
         }
     }
     else
         {
-            sendImg('https://imageshost.ru/images/2020/09/08/01.png',chat_id)
+            send('Пиши мне в личку',chat_id)
         }
   }
 }
@@ -57,7 +60,7 @@ function getSomethingFromContact(lesson, chat_id)
 }
 
 //Функция для получения информации о ближайших парах
-function getSomethingFromLesson(lesson,chat_id)
+function getSomethingFromLesson(lesson)
 {
   var tableID = SpreadsheetApp.openById("1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY");
   var sheetLocal = tableID.getSheetByName('Пары');
@@ -72,17 +75,17 @@ function getSomethingFromLesson(lesson,chat_id)
       hour: 'numeric',
       minute: 'numeric'
   }
-  
-  //lesson = 'Скоро'
   while(positionYStart <= 30)
   {
       inTable = new Date(sheetLocal.getRange(positionYStart,positionXStart).getValues()[0][0])
       nextInTable = new Date(sheetLocal.getRange(positionYStart+1,positionXStart).getValues()[0][0])
   
-      if (((lesson == undefined) && (inTable.getDate()+'/'+inTable.getMonth() == toDay.getDate()+'/'+toDay.getMonth()))
-      || ((lesson == 'Всё') && (sheetLocal.getRange(positionYStart,positionXStart+1).getValues()[0][0] != '')) 
-      || ((lesson == 'Скоро') && (inTable > toDay)))
-      {
+      if (((lesson == undefined) && (inTable.getDate()+'/'+inTable.getMonth() == toDay.getDate()+'/'+toDay.getMonth())) //Обработка отсудствующего сообщения для вывода пар, которые есть сегодня
+      || ((lesson == 'Всё') && (sheetLocal.getRange(positionYStart,positionXStart+1).getValues()[0][0] != ''))  //Обработка команды 'Всё' для вывода всех пар
+      || ((lesson == 'Скоро') && (inTable > toDay)) //Обработка команды 'Скоро' для вывода всех пар в ближайщей учебный день
+      || ((lesson == 'Осталось') && (inTable > toDay)) //Обработка команды 'Осталось' для вывода всех оставшися пар этой недели
+      )
+      {   //Сбор информации с строки в таблице
           what = 'Что: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues()[0][0])
           where = '\nГде: ' + String(sheetLocal.getRange(positionYStart,positionXStart+2).getValues()[0][0])
           when = '\nКогда: ' + sheetLocal.getRange(positionYStart,positionXStart).getValues().toLocaleString("ru", dateOpt)
@@ -96,12 +99,11 @@ function getSomethingFromLesson(lesson,chat_id)
           }
           lessonData = lessonData + what + where + when + link + '\n----------\n'
           cheak++
-          
+          //Дополнительная обработка для команды 'Скоро' что бы вывести только один день
           if ((lesson == 'Скоро')&&(inTable.getDate()+'/'+inTable.getMonth() != nextInTable.getDate()+'/'+nextInTable.getMonth()))
           {
             break
-          
-          }
+          }   
        }
   positionYStart++
   }
@@ -113,10 +115,6 @@ function getSomethingFromLesson(lesson,chat_id)
       lessonData = 'Сегодня пар нету'
   }
   return lessonData
-
-  
-
-
 }
 
 
@@ -140,7 +138,7 @@ function getSomethingFromQuest(str)
   {//Выборка по предмету среди будущих событий (в случа отсутствия названия предмета цикл выполняется один раз и выводит только ближайшее событие)
       if (((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined)||(str=='Всё'))
       && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false')
-      {//Сбор информации со строки   
+      {//Сбор информации с строки в таблице
          what = 'Что: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues())
          where = '\nГде: ' + String(sheetLocal.getRange(positionYStart,positionXStart+2).getValues())
          when = '\nКогда: ' + sheetLocal.getRange(positionYStart,positionXStart-2).getValues().toLocaleString("ru", dateOpt)
@@ -158,7 +156,6 @@ function getSomethingFromQuest(str)
          //Счётчик для того что бы вывести только ближайщее событие. Цикл остановится при получение одной записи из таблицы и отсутвие имени предмета 
          check ++ 
       }
-
       positionYStart++;
   }
   iventData = '\n----------\n'+ iventData
