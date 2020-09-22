@@ -81,7 +81,7 @@ function dateUpdate() {
   while(positionYStart <= 30)
   {
       inTable = new Date(sheetLocal.getRange(positionYStart,positionXStart).getValues()[0][0])
-      if(inTable.getDate() == toDay.getDate())
+      if(inTable.getDate()+'/'+inTable.getMonth() == toDay.getDate()+'/'+toDay.getMonth()) 
       { 
           Logger.log(inTable)
           inTable.setDate(inTable.getDate() + 7)
