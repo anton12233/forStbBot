@@ -26,8 +26,14 @@ function doPost(e)
                 send("https://github.com/anton12233/forStbBot/",chat_id)
                 break;
             case '/help':
-                send ('/quest <Название предмета> - Получить список актуальных мероприятий (Если написать команду без предмета, то будет только ближайшее событие)(что-бы вывести все события нужно написать вместо названия предмета слово "Всё")\n'+
-                '/lesson - Получить информацию по рассписанию (Без добавочных команд выдаст расписание на сегодня; \nЕсли после команды дописать "Скоро", то бот выдаст все пары на ближайший день; \nЕсли после команды дописать "Всё", то бот выдаст расписание на всю неделю; \nЕсли после команды дописать "Осталось", то бот выдаст только оставшиеся пары этой недели)(Обновление дат переодических пар будет происходить каждую субботу после пар)\n'+
+                send (
+                '/quest <Название предмета> - Получить список актуальных мероприятий (Если написать команду без предмета, то будет только ближайшее событие)'+
+                  '(что-бы вывести все события нужно написать вместо названия предмета слово "Всё")\n'+
+                '/lesson - Получить информацию по рассписанию (Без добавочных команд выдаст расписание на сегодня;' +
+                  '\nЕсли после команды дописать "Скоро", то бот выдаст все пары на ближайший день;' +
+                  '\nЕсли после команды дописать "Всё", то бот выдаст расписание на всю неделю;' +
+                  '\nЕсли после команды дописать "Осталось", то бот выдаст только оставшиеся пары этой недели)'+
+                  '(Обновление дат переодических пар будет происходить каждую субботу после пар)\n'+
                 '/list - Получить список предметов\n'+
                 '/github - репозиторий с кодом бота и скриптами таблицы',chat_id)
                 break;
@@ -44,7 +50,7 @@ function doPost(e)
     }
     else
         {
-            send('Пиши мне в личку',chat_id)
+            send('lalala',chat_id)
         }
   }
 }
@@ -64,40 +70,60 @@ function getSomethingFromLesson(lesson)
 {
   var tableID = SpreadsheetApp.openById("1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY");
   var sheetLocal = tableID.getSheetByName('Пары');
-  var positionYStart = 3, positionXStart = 2
+  var positionYStart = 4, positionXStart = 2
   var toDay = new Date(), inTable, nextInTable
   var cheak = 0
-  var lessonData = '', what, where, when, link;
+  var lessonData = '', what, where, when, link, date = "cfsdfds";
+  // Словарь для команд
+  const lessonVse = ["всё","все","all"]
+  const lessonCkoro = ["скоро","soon"]
+  const lessonOstalos = ["remaining","осталось","будет"]
+  
+  
   var dateOpt = 
   { //Форма для вывода даты
-      month: 'long',
-      day: 'numeric',
       hour: 'numeric',
       minute: 'numeric'
   }
-  while(positionYStart <= 30)
+  
+  //Обработчик выбора чётных и нечётных недель
+  if (sheetLocal.getRange(1,1).getValues()[0][0] == "Чёт")
+  {
+      positionXStart = 5
+  }
+
+
+  lesson = lesson.toLowerCase()
+  Logger.log(lesson)
+  while(positionYStart <= 31)
   {
       inTable = new Date(sheetLocal.getRange(positionYStart,positionXStart).getValues()[0][0])
       nextInTable = new Date(sheetLocal.getRange(positionYStart+1,positionXStart).getValues()[0][0])
   
       if (((lesson == undefined) && (inTable.getDate()+'/'+inTable.getMonth() == toDay.getDate()+'/'+toDay.getMonth())) //Обработка отсудствующего сообщения для вывода пар, которые есть сегодня
-      || ((lesson == 'Всё') && (sheetLocal.getRange(positionYStart,positionXStart+1).getValues()[0][0] != ''))  //Обработка команды 'Всё' для вывода всех пар
-      || ((lesson == 'Скоро') && (inTable > toDay)) //Обработка команды 'Скоро' для вывода всех пар в ближайщей учебный день
-      || ((lesson == 'Осталось') && (inTable > toDay)) //Обработка команды 'Осталось' для вывода всех оставшися пар этой недели
+      || ((lessonVse.includes(lesson)) && (sheetLocal.getRange(positionYStart,positionXStart+1).getValues()[0][0] != ''))  //Обработка команды 'Всё' для вывода всех пар
+      || ((lessonCkoro.includes(lesson)) && (inTable > toDay)) //Обработка команды 'Скоро' для вывода всех пар в ближайщей учебный день
+      || ((lessonOstalos.includes(lesson)) && (inTable > toDay)) //Обработка команды 'Осталось' для вывода всех оставшися пар этой недели
       )
       {   //Сбор информации с строки в таблице
-          what = 'Что: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues()[0][0])
-          where = '\nГде: ' + String(sheetLocal.getRange(positionYStart,positionXStart+2).getValues()[0][0])
-          when = '\nКогда: ' + sheetLocal.getRange(positionYStart,positionXStart).getValues().toLocaleString("ru", dateOpt)
+          
+          
+          if (sheetLocal.getRange(positionYStart,1).getValues() != '')
+          {
+              date = 'День недели: ' + sheetLocal.getRange(positionYStart,1).getValues()
+          }
+          when = '\nВремя: ' + sheetLocal.getRange(positionYStart,positionXStart).getValues().toLocaleString("ru", dateOpt)
+          what = '\nПредмет: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues()[0][0])
+          
           if ((sheetLocal.getRange(positionYStart,positionXStart+2).getFormula())[1] != null)
           {//И формирование ссылки по стандарту Markdown для отправки в telegram
-              link = '\nCсылка: '+'[Тут]('+ /"(.*?)"/.exec(sheetLocal.getRange(positionYStart,positionXStart+2).getFormula())[1]+')'
+              link = '\nCсылка в тимс: '+'[Тык]('+ /"(.*?)"/.exec(sheetLocal.getRange(positionYStart,positionXStart+2).getFormula())[1]+')'
           }
           else 
           {
               link = ''
           }
-          lessonData = lessonData + what + where + when + link + '\n----------\n'
+          lessonData = lessonData + date + when + what + link + '\n----------\n'
           cheak++
           //Дополнительная обработка для команды 'Скоро' что бы вывести только один день
           if ((lesson == 'Скоро')&&(inTable.getDate()+'/'+inTable.getMonth() != nextInTable.getDate()+'/'+nextInTable.getMonth()))
@@ -109,11 +135,12 @@ function getSomethingFromLesson(lesson)
   }
   
   lessonData = '\n----------\n'+ lessonData
-  
+  Logger.log(lessonData)
   if(cheak == 0)
   {
       lessonData = 'Сегодня пар нету'
   }
+  Logger.log(lessonData)
   return lessonData
 }
 
@@ -134,10 +161,12 @@ function getSomethingFromQuest(str)
       hour: 'numeric',
       minute: 'numeric'
   }
-  while((sheetLocal.getRange(positionYStart,positionXStart).getValues() != '') && (!(str == undefined && check == 1)))
-  {//Выборка по предмету среди будущих событий (в случа отсутствия названия предмета цикл выполняется один раз и выводит только ближайшее событие)
-      if (((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined)||(str=='Всё'))
-      && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false')
+  while((sheetLocal.getRange(positionYStart,positionXStart).getValues() != '') //Выход при остуствии событий
+  && (!(str == undefined && check == 1)) //Условие для выхода после вывода ближайшего события
+  )
+  {
+      if (((sheetLocal.getRange(positionYStart,positionXStart).getValues() == str)||(str == undefined)||(str=='Всё'))  //Условия для вывода событий по предмету, ближайшего события или всех событий
+      && String(sheetLocal.getRange(positionYStart,positionXStart-3).getValues()) == 'false') //Условия для вывода только будущих событий
       {//Сбор информации с строки в таблице
          what = 'Что: ' + String(sheetLocal.getRange(positionYStart,positionXStart+1).getValues())
          where = '\nГде: ' + String(sheetLocal.getRange(positionYStart,positionXStart+2).getValues())
