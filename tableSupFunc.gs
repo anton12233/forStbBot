@@ -11,7 +11,12 @@ function menu()
     menuEntries.push({name: "Закрасить места", functionName: "placeColorize"});
     menuEntries.push(null); 
     menuEntries.push({name: "Отчислить", functionName: "numeratic"});
+    menuEntries.push(null); 
+    menuEntries.push({name: "Увеличить даты", functionName: "dateUpdate"});
     ss.addMenu("А я меню с фунциями", menuEntries);
+    
+    
+    
 }
 
 //Создание и определение глобальных переменных цветов для красящих функций  
@@ -75,19 +80,26 @@ function dateColorize() {
 function dateUpdate() {
   var tableID = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1f8L_4mzNSFiH7dQF4OH8jIJbF-wbvh33Lgwt31jBrVY/edit#gid=0');
   var sheetLocal = tableID.getSheetByName('Пары');
-  var positionYStart = 3, positionXStart = 1
+  var positionYStart = 3, positionXStart = 2
   
   var inTable, toDay = new Date()
-  while(positionYStart <= 30)
+  while((positionYStart <= 31) && (positionXStart <= 7))
   {
       inTable = new Date(sheetLocal.getRange(positionYStart,positionXStart).getValues()[0][0])
-      if(inTable.getDate()+'/'+inTable.getMonth() == toDay.getDate()+'/'+toDay.getMonth()) 
+      if(inTable < toDay) 
       { 
           Logger.log(inTable)
           inTable.setDate(inTable.getDate() + 7)
           sheetLocal.getRange(positionYStart,positionXStart).setValue(inTable)
       }   
-  positionYStart++
+      positionYStart++
+  
+  
+      if (positionYStart == 30)
+      {
+          positionYStart = 3
+          positionXStart = positionXStart + 3
+      }
   }
 };
 
