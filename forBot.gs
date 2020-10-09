@@ -50,7 +50,7 @@ function doPost(e)
     }
     else
         {
-            send('lalala',chat_id)
+            //send('lalala',chat_id)
         }
   }
 }
@@ -89,11 +89,14 @@ function getSomethingFromLesson(lesson)
   //Обработчик выбора чётных и нечётных недель
   if (sheetLocal.getRange(1,1).getValues()[0][0] == "Чёт")
   {
-      positionXStart = 5
+      positionXStart = 6
   }
 
-
-  lesson = lesson.toLowerCase()
+  
+  if (lesson != undefined)
+  {
+      lesson = lesson.toLowerCase()
+  }
   Logger.log(lesson)
   while(positionYStart <= 31)
   {
@@ -161,6 +164,7 @@ function getSomethingFromQuest(str)
       hour: 'numeric',
       minute: 'numeric'
   }
+  
   while((sheetLocal.getRange(positionYStart,positionXStart).getValues() != '') //Выход при остуствии событий
   && (!(str == undefined && check == 1)) //Условие для выхода после вывода ближайшего события
   )
@@ -193,6 +197,7 @@ function getSomethingFromQuest(str)
   {//Cообщение о том что ничего не нашел
       iventData = 'Ничего не нашел'
   }
+  
   return iventData
 }
 
@@ -205,7 +210,9 @@ function send (msg, chat_id)
     'chat_id': String(chat_id),
     'text': msg,
     'disable_notification': true,
-    'parse_mode': 'Markdown'
+    'parse_mode': 'Markdown',
+    'reply_to_message' : false,
+    'disable_web_page_preview' : true
   }
   var data =
   {
