@@ -13,10 +13,7 @@ function menu()
     menuEntries.push({name: "Отчислить", functionName: "numeratic"});
     menuEntries.push(null); 
     menuEntries.push({name: "Увеличить даты", functionName: "dateUpdate"});
-    ss.addMenu("А я меню с фунциями", menuEntries);
-    
-    
-    
+    ss.addMenu("А я меню с фунциями", menuEntries);  
 }
 
 //Создание и определение глобальных переменных цветов для красящих функций  
@@ -154,7 +151,7 @@ function numeratic(){
   var sheetLocal = tableID.getSheetByName('Список_студентов');
   var i = 3, numOf = 1, number = 0;
  
-  while(sheetLocal.getRange(i, 1).getValues() != '')
+  while(sheetLocal.getRange(i, 1+1).getValues() != '')
     {number++;
     i++}
     
